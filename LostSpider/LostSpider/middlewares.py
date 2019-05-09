@@ -7,7 +7,6 @@
 
 from scrapy import signals
 from selenium import webdriver
-from time import sleep
 
 from scrapy.http import HtmlResponse
 
@@ -88,16 +87,16 @@ class LostspiderDownloaderMiddleware(object):
         driver = webdriver.Chrome(options=opt)
         # 用浏览器发起get请求
         driver.get(request.url)
-        # sleep(1)
+
         body = driver.page_source
 
-        for i in range(0,2):
-            try:
-                driver.find_element_by_link_text(">").click()
-            except:
-                body = body
-            else:
-                body += driver.page_source
+        # for i in range(0,2):
+        #     try:
+        #         driver.find_element_by_link_text(">").click()
+        #     except:
+        #         body = body
+        #     else:
+        #         body += driver.page_source
 
         # 根据浏览器解析出来的网页源码创建出一个响应对象
         return HtmlResponse(url=driver.current_url, body=body, encoding='utf-8', request=request)

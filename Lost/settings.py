@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'Admin',
+    'Common',
     'Rescue',
     'User',
     'rest_framework'
@@ -58,7 +59,7 @@ ROOT_URLCONF = 'Lost.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, "templates")],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -70,6 +71,10 @@ TEMPLATES = [
         },
     },
 ]
+
+TEMPLATE_DIRS = (
+    os.path.join(BASE_DIR, 'templates'),
+)
 
 WSGI_APPLICATION = 'Lost.wsgi.application'
 
@@ -128,6 +133,9 @@ USE_TZ = False
 STATIC_URL = '/static/'
 
 ADMIN_USER_TIMEOUT = 60 * 60 * 24 * 7
+RESCUE_USER_TIMEOUT = 60 * 60 * 24 * 7
+
+ADMIN_USER = ("Root","Admin")
 
 CACHES = {
     "default": {

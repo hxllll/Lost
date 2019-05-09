@@ -5,25 +5,25 @@ from django.shortcuts import render
 
 # Create your views here.
 from rest_framework.exceptions import APIException
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, ListCreateAPIView
 from rest_framework.response import Response
 
-from Admin.models import AdminUser
-from Admin.serializers import AdminUserSerializer
-from Lost.settings import ADMIN_USER_TIMEOUT
+from Admin.authentication import AdminUserAuthentication
+from Admin.models import AdminUser, Permission
+from Admin.permission import SuperAdminUserPermission
+from Admin.serializers import AdminUserSerializer, PermissionSerializer
+from Lost.settings import ADMIN_USER_TIMEOUT, ADMIN_USER
+from utils.user_token_util import generate_admin_token
 
 
 class AdminUsersAPIView(CreateAPIView):
-
     serializer_class = AdminUserSerializer
     queryset = AdminUser.objects.filter(is_delete=False)
 
     def post(self, request, *args, **kwargs):
-
         action = request.query_params.get("action")
-
         if action == "register":
-            return self.create(request,*args,**kwargs)
+            return self.create(request, *args, **kwargs)
         elif action == "login":
             a_username = request.data.get("a_username")
             a_password = request.data.get("a_password")
@@ -39,9 +39,9 @@ class AdminUsersAPIView(CreateAPIView):
                 raise APIException(detail="密码错误")
 
             if user.is_delete:
-                raise  APIException(detail="用户已离职")
+                raise APIException(detail="用户已离职")
 
-            token = uuid.uuid4().hex
+            token = generate_admin_token()
 
             cache.set(token, user.id, timeout=ADMIN_USER_TIMEOUT)
 
@@ -55,3 +55,44 @@ class AdminUsersAPIView(CreateAPIView):
 
         else:
             raise APIException(detail="请提供正确的操作")
+
+    def perform_create(self, serializer):
+        a_username = self.request.data.get("a_username")
+
+        serializer.save(is_super=a_username in ADMIN_USER)
+
+
+class PermissionsAPIView(ListCreateAPIView):
+    queryset = Permission.objects.all()
+    serializer_class = PermissionSerializer
+    authentication_classes = (AdminUserAuthentication,)
+    permission_classes = (SuperAdminUserPermission,)
+
+    def patch(self, request, *args, **kwargs):
+        user_id = request.data.get("user_id")
+        permission_id = request.data.get("permission_id")
+
+        try:
+            permission = Permission.objects.get(pk=permission_id)
+        except Exception as e:
+            print(e)
+            raise APIException(detail="权限不存在")
+
+        try:
+            user = AdminUser.objects.get(pk=user_id)
+        except Exception as e:
+            print(e)
+            raise APIException(detail="用户不存在")
+
+        user.permission_set.add(permission)
+
+        data = {
+            "msg": "add success",
+            "status": 201
+        }
+
+        return Response(data)
+
+
+def register(request):
+    return render(request, "Admin/register.html")

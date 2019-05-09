@@ -18,4 +18,7 @@ from django.contrib import admin
 
 urlpatterns = [
     url('^admin/', include('Admin.urls')),
+    url('^common/', include('Common.urls')),
+    url('^rescue/', include('Rescue.urls')),
+
 ]
