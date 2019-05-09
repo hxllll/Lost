@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>用户注册</title>
+    </head>
+    <body>
+        <h3>注册</h3>
+        <hr />
+        <form action="http://127.0.0.1:8000/admin/users/?action=register" method="POST">
+            <table border="0px">
+                <tr height="35px">
+                    <td width="150px">用户名:</td>
+                    <td width="300px">
+                        <input type="text" name="a_username" id="uname" value="" />
+                    </td>
+                </tr>
+                <tr height="35px">
+                    <td width="150px">密 码:</td>
+                    <td width="300px">
+                        <input type="password" name="a_password" id="pwd" value="" />
+                    </td>
+                </tr>
+
+                <tr>
+                    <td colspan="2" align="center">
+                        <input type="submit" id="submit" value="注册"/>
+                        <input type="reset" id="reset" value="重置"/>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </body>
+    <script>
+         var sub = document.getElementById('submit');
+            sub.onclick = function () {
+                var uname = document.getElementById('uname').value;
+                var pwd = document.getElementById('pwd').value;
+                var xhr = new XMLHttpRequest();
+                ajaxResponse(xhr,
+                function () {
+                    var respones = JSON.parse(xhr.responseText);
+                    alert(respones.msg);
+                },function () {
+                    });
+
+                var user = {
+                    a_username:uname,
+                    a_password:pwd
+                };
+                xhr.open('post', 'http://127.0.0.1:8000/admin/users/?action=register',true);
+                xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded;charset=utf-8');
+                xhr.send(JSON.stringify(user));
+        };
+    </script>
+</html>
